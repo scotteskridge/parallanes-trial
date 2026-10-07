@@ -10,3 +10,33 @@ main {
   margin: 2rem auto;
   padding: 0 1rem;
 }
+
+#books {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.book-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+/* Block-level so the author sits under the title rather than beside it. */
+.book-title,
+.book-author {
+  display: block;
+}
+
+.book-author {
+  color: #666;
+  margin-top: 0.25rem;
+}
+
+.empty {
+  color: #666;
+  font-style: italic;
+}
