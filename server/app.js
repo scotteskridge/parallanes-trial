@@ -2,14 +2,17 @@
 import express from "express";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadBooks, saveBooks } from "./store.js";
 
 const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", "public");
 
-export function createApp() {
-  const books = [
-    { id: 1, title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", read: false },
-    { id: 2, title: "A Philosophy of Software Design", author: "John Ousterhout", read: false },
-  ];
+// booksFile has no default, so a test that forgets to pass one fails instead of writing to the
+// real data/books.json; index.js chooses the real path.
+export function createApp({ booksFile } = {}) {
+  if (!booksFile) {
+    throw new Error("createApp needs a booksFile to keep the books in");
+  }
+  const books = loadBooks(booksFile);
 
   const app = express();
   app.use(express.json());
@@ -31,6 +34,9 @@ export function createApp() {
     // freed by deleting the newest book would be reused; revisit if deleting is added.
     const id = Math.max(0, ...books.map((b) => b.id)) + 1;
     const book = { id, title: title.trim(), author: author.trim(), read: false };
+    // Save first and change the list after: if the write throws, memory still matches the file
+    // and the client's retry doesn't add a duplicate.
+    saveBooks(booksFile, [...books, book]);
     books.push(book);
     res.status(201).json(book);
   });
@@ -45,6 +51,7 @@ export function createApp() {
     if (typeof read !== "boolean") {
       return res.status(400).json({ error: "read must be true or false" });
     }
+    saveBooks(booksFile, books.map((b) => (b === book ? { ...b, read } : b)));
     book.read = read;
     res.json(book);
   });

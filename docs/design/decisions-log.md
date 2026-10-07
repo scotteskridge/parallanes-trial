@@ -27,6 +27,22 @@ the card itself was the alternative, closer to the box but more code. Confirmed 
 the owner.
 **Affects:** `public/render.js` (`renderReadCount`).
 
+## 2026-10-07: How the books file is created, located, guarded and kept out of git
+**Decision:** the server writes the two starting books to the books file at startup when the file
+is missing. A file that isn't valid JSON, isn't a list, or can't be read stops the server with an
+error naming the file, and the file is left untouched. A relative `BOOKS_FILE` resolves against
+the project root, like the default `data/books.json`. `data/` should be gitignored, but the root
+`.gitignore` is outside every lane and the lane check refused the commit, so that line is still to
+be added by the owner.
+**Why:** a file that always exists once the server is up is simpler to reason about than seeding
+on the first change. Falling back to the seed on a bad file was rejected because the next change
+would overwrite the reader's real books. Resolving against the project root means the same
+setting names the same file wherever the server starts; resolving against the current folder
+(quietly making a second list) and accepting only absolute paths were rejected. `data/` holds
+each person's own list, not source.
+**Affects:** `server/store.js`, `server/index.js`; plan
+`docs/plans/finished/2026-10-07-persist.md`.
+
 ## 2026-10-07: How PATCH /api/books/:id resolves ids and orders its errors
 **Decision:** the id is matched with `Number()`, so `/api/books/1.0` (or `0x1`, `1e0`) reaches book
 1 and a non-numeric id is a 404. An unknown id gets the 404 before the body is checked, so a bad id

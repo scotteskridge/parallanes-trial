@@ -1,16 +1,142 @@
-import { test } from "node:test";
+import { test, after } from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { createApp } from "./app.js";
 
-async function withServer(fn) {
-  const server = createApp().listen(0);
+// Every test gets its own file under one temp folder, so tests never touch data/books.json or
+// each other's books.
+const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), "reading-list-test-"));
+after(() => fs.rmSync(tmpRoot, { recursive: true, force: true }));
+
+let fileCount = 0;
+function tempBooksFile() {
+  fileCount += 1;
+  return path.join(tmpRoot, `books-${fileCount}.json`);
+}
+
+async function withServer(fn, booksFile = tempBooksFile()) {
+  const server = createApp({ booksFile }).listen(0);
   await new Promise((resolve) => server.once("listening", resolve));
   try {
     await fn(`http://127.0.0.1:${server.address().port}`);
   } finally {
-    server.close();
+    await new Promise((resolve) => server.close(resolve));
   }
 }
+
+const startingTitles = ["The Pragmatic Programmer", "A Philosophy of Software Design"];
+
+test("a missing books file is seeded with the two starting books", async () => {
+  const booksFile = tempBooksFile();
+  await withServer(async (base) => {
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.deepEqual(books.map((b) => b.title), startingTitles);
+  }, booksFile);
+  const saved = JSON.parse(fs.readFileSync(booksFile, "utf8"));
+  assert.deepEqual(saved.map((b) => b.title), startingTitles);
+});
+
+test("a missing folder for the books file is created", async () => {
+  const booksFile = path.join(tmpRoot, "no-such-folder", "books.json");
+  await withServer(async (base) => {
+    assert.equal((await fetch(`${base}/api/books`)).status, 200);
+  }, booksFile);
+  assert.ok(fs.existsSync(booksFile));
+});
+
+test("an existing books file is loaded as it is", async () => {
+  const booksFile = tempBooksFile();
+  const stored = [{ id: 7, title: "Refactoring", author: "Martin Fowler", read: true }];
+  fs.writeFileSync(booksFile, JSON.stringify(stored));
+  await withServer(async (base) => {
+    assert.deepEqual(await (await fetch(`${base}/api/books`)).json(), stored);
+  }, booksFile);
+});
+
+test("a book added with POST is still there after a restart", async () => {
+  const booksFile = tempBooksFile();
+  let added;
+  await withServer(async (base) => {
+    added = await (await postBook(base, { title: "Refactoring", author: "Martin Fowler" })).json();
+  }, booksFile);
+  await withServer(async (base) => {
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.deepEqual(books.at(-1), added);
+  }, booksFile);
+});
+
+test("a book marked read with PATCH is still read after a restart", async () => {
+  const booksFile = tempBooksFile();
+  await withServer(async (base) => {
+    assert.equal((await patchBook(base, 1, { read: true })).status, 200);
+  }, booksFile);
+  await withServer(async (base) => {
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.equal(books.find((b) => b.id === 1).read, true);
+  }, booksFile);
+});
+
+test("a refused request leaves the books file unchanged", async () => {
+  const booksFile = tempBooksFile();
+  await withServer(async (base) => {
+    const before = fs.readFileSync(booksFile, "utf8");
+    assert.equal((await postBook(base, { title: "" })).status, 400);
+    assert.equal((await patchBook(base, 1, { read: "yes" })).status, 400);
+    assert.equal(fs.readFileSync(booksFile, "utf8"), before);
+  }, booksFile);
+});
+
+for (const [name, content] of [
+  ["not valid JSON", '[{"id": 1,'],
+  ["not a list", '{"books": []}'],
+]) {
+  test(`createApp refuses a books file that is ${name}, naming the file`, () => {
+    const booksFile = tempBooksFile();
+    fs.writeFileSync(booksFile, content);
+    assert.throws(() => createApp({ booksFile }), (err) => err.message.includes(booksFile));
+    // The bad file is left for a person to inspect, not overwritten with the seed.
+    assert.equal(fs.readFileSync(booksFile, "utf8"), content);
+  });
+}
+
+test("createApp refuses a books file it cannot read, naming the file", () => {
+  // A folder where the file should be: reading it fails with EISDIR, which has no file name.
+  const booksFile = path.join(tmpRoot, "a-folder-not-a-file");
+  fs.mkdirSync(booksFile);
+  assert.throws(() => createApp({ booksFile }), (err) => err.message.includes(booksFile));
+});
+
+// A folder where the temp file should go makes every save fail, whatever the platform.
+function breakSaving(booksFile) {
+  fs.mkdirSync(`${booksFile}.tmp`);
+}
+
+test("a POST whose save fails answers 500 and adds no book", async () => {
+  const booksFile = tempBooksFile();
+  await withServer(async (base) => {
+    breakSaving(booksFile);
+    const res = await postBook(base, { title: "Refactoring", author: "Martin Fowler" });
+    assert.equal(res.status, 500);
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.deepEqual(books.map((b) => b.title), startingTitles);
+  }, booksFile);
+});
+
+test("a PATCH whose save fails answers 500 and leaves the book unread", async () => {
+  const booksFile = tempBooksFile();
+  await withServer(async (base) => {
+    breakSaving(booksFile);
+    assert.equal((await patchBook(base, 1, { read: true })).status, 500);
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.equal(books.find((b) => b.id === 1).read, false);
+  }, booksFile);
+});
+
+test("createApp refuses to start without a books file", () => {
+  assert.throws(() => createApp(), /booksFile/);
+});
 
 test("GET /api/books lists the books", async () => {
   await withServer(async (base) => {
