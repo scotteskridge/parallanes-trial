@@ -97,6 +97,89 @@ for (const [name, body, field] of [
   });
 }
 
+test("GET /api/books starts every book as unread", async () => {
+  await withServer(async (base) => {
+    const books = await (await fetch(`${base}/api/books`)).json();
+    assert.ok(books.every((b) => b.read === false));
+  });
+});
+
+test("POST /api/books adds the new book as unread", async () => {
+  await withServer(async (base) => {
+    const book = await (await postBook(base, { title: "Refactoring", author: "Martin Fowler" })).json();
+    assert.equal(book.read, false);
+  });
+});
+
+function patchBook(base, id, body) {
+  return fetch(`${base}/api/books/${id}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+test("PATCH /api/books/:id marks a book as read and returns it", async () => {
+  await withServer(async (base) => {
+    const res = await patchBook(base, 1, { read: true });
+    assert.equal(res.status, 200);
+    const book = await res.json();
+    assert.equal(book.id, 1);
+    assert.equal(book.read, true);
+
+    const list = await (await fetch(`${base}/api/books`)).json();
+    assert.deepEqual(list.find((b) => b.id === 1), book);
+  });
+});
+
+test("PATCH /api/books/:id marks a read book as unread again", async () => {
+  await withServer(async (base) => {
+    await patchBook(base, 1, { read: true });
+    const res = await patchBook(base, 1, { read: false });
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).read, false);
+  });
+});
+
+for (const id of ["999", "abc"]) {
+  test(`PATCH /api/books/${id} refuses an unknown id with a JSON 404`, async () => {
+    await withServer(async (base) => {
+      const res = await patchBook(base, id, { read: true });
+      assert.equal(res.status, 404);
+      const { error } = await res.json();
+      assert.match(error, /not found/);
+    });
+  });
+}
+
+for (const [name, body] of [
+  ["missing read", {}],
+  ["string read", { read: "true" }],
+  ["numeric read", { read: 1 }],
+  ["null read", { read: null }],
+]) {
+  test(`PATCH /api/books/:id refuses a ${name} with 400 and leaves the book alone`, async () => {
+    await withServer(async (base) => {
+      const res = await patchBook(base, 1, body);
+      assert.equal(res.status, 400);
+      const { error } = await res.json();
+      assert.match(error, /read/);
+
+      const list = await (await fetch(`${base}/api/books`)).json();
+      assert.equal(list.find((b) => b.id === 1).read, false);
+    });
+  });
+}
+
+test("PATCH /api/books/:id refuses a request with no body with 400", async () => {
+  await withServer(async (base) => {
+    const res = await fetch(`${base}/api/books/1`, { method: "PATCH" });
+    assert.equal(res.status, 400);
+    const { error } = await res.json();
+    assert.match(error, /read/);
+  });
+});
+
 test("the front end is served", async () => {
   await withServer(async (base) => {
     const res = await fetch(`${base}/`);

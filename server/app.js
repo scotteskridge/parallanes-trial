@@ -7,8 +7,8 @@ const publicDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "..", 
 
 export function createApp() {
   const books = [
-    { id: 1, title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas" },
-    { id: 2, title: "A Philosophy of Software Design", author: "John Ousterhout" },
+    { id: 1, title: "The Pragmatic Programmer", author: "Andrew Hunt and David Thomas", read: false },
+    { id: 2, title: "A Philosophy of Software Design", author: "John Ousterhout", read: false },
   ];
 
   const app = express();
@@ -30,9 +30,23 @@ export function createApp() {
     // Max + 1 rather than length + 1, which would collide with an existing id. Placeholder: an id
     // freed by deleting the newest book would be reused; revisit if deleting is added.
     const id = Math.max(0, ...books.map((b) => b.id)) + 1;
-    const book = { id, title: title.trim(), author: author.trim() };
+    const book = { id, title: title.trim(), author: author.trim(), read: false };
     books.push(book);
     res.status(201).json(book);
+  });
+
+  app.patch("/api/books/:id", (req, res) => {
+    // A non-numeric id becomes NaN, which matches no book, so it gets the same 404.
+    const book = books.find((b) => b.id === Number(req.params.id));
+    if (!book) {
+      return res.status(404).json({ error: "book not found" });
+    }
+    const { read } = req.body ?? {};
+    if (typeof read !== "boolean") {
+      return res.status(400).json({ error: "read must be true or false" });
+    }
+    book.read = read;
+    res.json(book);
   });
 
   // express.json() rejects a malformed body before any route runs; without this the client gets
