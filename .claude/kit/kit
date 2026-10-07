@@ -1,0 +1,20 @@
+#!/bin/sh
+# Runs the kit CLI for kit-owned skills, which can't hold this machine's interpreter path or the
+# project's {{kit_command}}. Usage, from the project root: sh .claude/kit/kit <command> [args]
+# Exit codes pass through unchanged (0 done, 1 findings or unfinished, 2 refused or usage).
+kit=$(dirname "$0")
+
+# The installer records the Python to use (a full path; on Windows `python` may be the Store alias).
+python=""
+if [ -f "$kit/python-path" ]; then
+    python=$(head -n 1 "$kit/python-path" | tr -d '\r')
+fi
+if [ -z "$python" ]; then
+    python=$(command -v python3 || command -v python)
+fi
+if [ -z "$python" ] || ! [ -x "$python" ]; then
+    echo "kit: no Python found; record one in .claude/kit/python-path" >&2
+    exit 2
+fi
+
+exec "$python" "$kit/cli.py" "$@"

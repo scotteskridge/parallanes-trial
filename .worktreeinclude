@@ -1,0 +1,7 @@
+# >>> claude-code-lanes-starter (managed: the installer rewrites the lines between these markers)
+# Files to copy into each new lane worktree. Uses .gitignore syntax; only files that match here AND
+# are gitignored are copied, so tracked files are never duplicated.
+.env
+.claude/settings.local.json
+.claude/kit/python-path
+# <<< claude-code-lanes-starter

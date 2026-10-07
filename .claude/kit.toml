@@ -1,0 +1,70 @@
+# Project configuration for the claude-code-lanes-starter kit, read by the kit CLI, hooks and CI.
+# Unknown keys are errors, so a typo can't silently switch a rule off.
+
+[project]
+name = "worklanes-trial"
+test_command = "npm test"
+integration_branch = "main"
+# Parallel lanes (see [[lanes]] at the end). Defaults shown:
+merge_mode = "local"                # "pr": finished tasks become pull requests; "local": fast-forward
+# worktree_root = ".claude/worktrees"  # where lane folders go; "../{project}-lanes" puts them beside
+# ownership = "ask"                 # an edit outside the lane's paths asks you first; "off": never
+# Paths open to every lane:
+# shared_paths = ["docs/changelog.d/**", "docs/backlog/**", "docs/plans/**", "docs/design/decisions-log.md", "docs/health/**"]
+
+# Forbidden patterns: checked after every agent edit, before each commit and in CI.
+# Run them by hand with: sh .claude/kit/kit check rules
+#
+# [[checks.rules]]
+# id = "no-print"
+# pattern = '\bprint\('             # Python regular expression, matched line by line
+# paths = ["src/**/*.py"]           # gitignore-style globs from the project root
+# exclude = ["src/cli/**"]          # optional
+# message = "Use the logger, not print()."
+# ignore_comments = true            # optional (default true): skip matches inside comments
+
+# Protected paths, secrets and commands. `sh .claude/kit/kit settings sync` writes the matching rules
+# into .claude/settings.json, which Claude Code enforces; a hook catches command forms those rules
+# miss; pre-commit and CI report changes to protected paths. What this stops and what it doesn't:
+# docs/ai/protected-paths.md. After editing this table, run `sh .claude/kit/kit settings sync`.
+[protected]
+paths = []                          # agents may not edit these, e.g. ["vendor/**", "docs/originals/"]
+commands = [                        # agents may not run these (flags match in any order)
+    "git push --force",
+    "git push -f",
+    "git reset --hard",
+    "git clean -f",
+    "git commit --no-verify",
+    "git commit -n",
+]
+secrets = [".env", ".env.*", "!.env.example"]  # agents may neither read nor edit these; add key files.
+                                    # "!name" exempts a bare file name listed after the names it cancels
+# guard_kit = true                  # edits to the kit's own config need your approval (false: off)
+
+# Lanes: several agent sessions at once, each in its own git worktree with its own paths.
+# Guide: docs/ai/parallel-lanes.md. Create the folders with `sh .claude/kit/kit lanes create`, check them
+# with `sh .claude/kit/kit lanes status`. Uncomment and adapt; add one [[lanes]] table per lane.
+#
+# [[lanes]]
+# name = "core"                     # lowercase letters, digits and '-': a folder name and branch prefix
+# scope = "Domain logic and its tests"
+# owns = ["src/core/**", "tests/core/**"]  # where two lanes match a file, the more specific pattern owns it
+# resources = { dev_port = 8001 }   # free-form; the agent is told each value at session start
+#
+# [[lanes]]
+# name = "api"
+# scope = "HTTP layer"
+# owns = ["src/api/**", "tests/api/**"]
+# resources = { dev_port = 8002 }
+
+[[lanes]]
+name = "api"
+scope = "The Express API and its tests"
+owns = ["server/**"]
+resources = { dev_port = 3001 }
+
+[[lanes]]
+name = "web"
+scope = "The front end: HTML, CSS and browser JS"
+owns = ["public/**"]
+resources = { dev_port = 3002 }

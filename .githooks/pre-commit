@@ -1,0 +1,20 @@
+#!/bin/sh
+# Installed by claude-code-lanes-starter: runs the project's checks on what is about to be committed.
+# Enabled with `git config core.hooksPath .githooks` (the installer asks first). Git for Windows
+# runs this with its own sh, so it works there too. To skip once, in an emergency: git commit --no-verify
+root=$(git rev-parse --show-toplevel) || exit 1
+
+# The installer records the Python to use (a full path; on Windows `python` may be the Store alias).
+python=""
+if [ -f "$root/.claude/kit/python-path" ]; then
+    python=$(head -n 1 "$root/.claude/kit/python-path")
+fi
+if [ -z "$python" ]; then
+    python=$(command -v python3 || command -v python)
+fi
+if [ -z "$python" ]; then
+    echo "kit pre-commit: no Python found; record one in .claude/kit/python-path" >&2
+    exit 1
+fi
+
+exec "$python" "$root/.claude/kit/cli.py" check all --staged

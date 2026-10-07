@@ -1,0 +1,136 @@
+{
+  "kit_version": "0.1.0.dev0",
+  "values": {
+    "install_date": "2026-10-07",
+    "integration_branch": "main",
+    "kit_command": "sh .claude/kit/kit",
+    "precommit": "yes",
+    "project_description": "TODO: one or two sentences on what this project is and who it's for.",
+    "project_name": "worklanes-trial",
+    "stack": "Node.js",
+    "test_command": "npm test"
+  },
+  "files": {
+    ".claude/agents/reviewer.md": "abb47598a15d27d54af5b9c7102664f3ec68676d8fc732cdabd66f4f1c9fb2b1",
+    ".claude/kit/VERSION": "8a17b37dcf1ab3d12780d7c303ab86b53bb629b60ea08b1af481e452bf38a351",
+    ".claude/kit/cli.py": "f20659f008fbc3cc40ce28a6ccc2e93f5291512cd731851083248ec607917b90",
+    ".claude/kit/hook": "b36d8144266353fa04bb23bf707cdba8365fffd2988cdd8cd1f6a5d945ccdf9b",
+    ".claude/kit/kit": "259d4bfec8b1bb5e90614ee9eec675ad56b081e63d7f6747810ebb95111af7df",
+    ".claude/kit/kitlib/__init__.py": "57a8fb944b9beaf6ab74d64f7c615aca5e2ddb1f2205c83db0e57b01eb895cef",
+    ".claude/kit/kitlib/changelog.py": "6200ad4caf1c07e855b96ee3a2d8b76954b9b89bff1855137620b56958f8756e",
+    ".claude/kit/kitlib/commands.py": "1177ee722a3897e4af5708cfb916b5f8f412f9524582a43dae5c0598ba615c1e",
+    ".claude/kit/kitlib/comments.py": "076b7a27600b87d2ddc5117b84ec01432d796cb9ceaff6704d664e6c323cfc71",
+    ".claude/kit/kitlib/config.py": "4fd2470b8f061e9b055ed66c2f95ee039c54b27cc881bab1d6b368bd0f7f23ab",
+    ".claude/kit/kitlib/file_commands.py": "e49f78449fecf2a00fc71fc3c93432b206cdf1d8118f6688715e01d117459fd9",
+    ".claude/kit/kitlib/findings.py": "1171c201cccc683b7e177732d57e90b24fe0d3b10812ac81f20b34f4ef8e70c4",
+    ".claude/kit/kitlib/gitfiles.py": "f4e8a0e62c508f168f1818f775509ce7d8cc41f0e31d163c0016a55188b57267",
+    ".claude/kit/kitlib/globs.py": "c7103b0ed5b3268c04a4cd6fe74584afbaf37f84b3c26e8875a7fedc8fc829a0",
+    ".claude/kit/kitlib/hooks.py": "cf19d3d2fed893f30ded96b87b9a6408636798c24403400b64f64ad2a89ad2d6",
+    ".claude/kit/kitlib/lane_boundary.py": "924b3cd5c49a89f0b34b58bce3c5b2e14609fbc2fc1622aaafb8bfd8ddeb1b06",
+    ".claude/kit/kitlib/lane_cli.py": "68cda3a11ad761085177ae086337b6e12b78898ca1e2c5e566d4b3f6668c8af6",
+    ".claude/kit/kitlib/lane_cycle.py": "409842b303e2691d75e3ab544be4dff28b86691404b115134e0f129eb74e8c27",
+    ".claude/kit/kitlib/lane_hooks.py": "b0aa59a9712102ef3bb6f79008d93b43b41f387cc3748007499180abb5f2005e",
+    ".claude/kit/kitlib/lane_merged.py": "28e280ddd2b62058d5757fba63ff4717e74eb02b5fbff3076cd995418f5d6c8b",
+    ".claude/kit/kitlib/lane_owners.py": "1295a6ffc90c9753b670323cee46f92c59b8d221ccd94eeee447e4a55904ff33",
+    ".claude/kit/kitlib/lane_pr.py": "f6436fe5a18250ebdfc4561e483c141975351effeafd78d7350cd015737e8d88",
+    ".claude/kit/kitlib/lane_setup.py": "97cec8834fc995766a45f90befb640ddf2c051fa271b1d5f6c0fc1273f586188",
+    ".claude/kit/kitlib/lane_status.py": "4062085746ff6d5e93abf16aa255b41cf83ed136256cef32260e2369d6f7551b",
+    ".claude/kit/kitlib/lanes.py": "28cc3c92ecc2b37b4cdc9a791c678b0a628cb0f229151ab4c23eb92ae8cc72a7",
+    ".claude/kit/kitlib/next_facts.py": "8db23401bc87cfc29209dfa47d6f181d9827c1094acfa451fb911d773f0f97b4",
+    ".claude/kit/kitlib/protected.py": "bbd669f05360b217eb67ce51e662c821dbadd9b9376bfcab80e10a23b5acc344",
+    ".claude/kit/kitlib/render.py": "5b987fe31f16928cd8e9517a39c4d72225437334f786299b75b1d9ed20075959",
+    ".claude/kit/kitlib/reviewer_hook.py": "d2d4158b47d44b0cdec602a0d101e013ce392e3916a266948a3838c767a8ba33",
+    ".claude/kit/kitlib/rules_check.py": "48ed44ce873940421154aa7bb361f972f299eb7a6621096c661836365bb9587a",
+    ".claude/kit/kitlib/settings.py": "5c11ee1996714866c4ad9a668ab30823081e1e5f169796e78fc8b06d2d0af324",
+    ".claude/review/universal.md": "282874d8bb9bfc9848cd2036a1274a5c45c66a699a731ee0366bfa136166c24a",
+    ".claude/skills/code-health/SKILL.md": "42707f037e77ecfb9aa3f60a20cabe5714bb8ae896ce28209830a2c9608d58b4",
+    ".claude/skills/code-health/report-template.md": "a9e183d7ffa366d6fc9e10022b1b9aa250f633372b47c0c520362d2b3a1cbd1b",
+    ".claude/skills/design/SKILL.md": "cd5551139d86cb5d87877627e3887beac64713675874a345caf7b6b85d484ba6",
+    ".claude/skills/implement/SKILL.md": "ea2df4bd0c391cb27cdcd8690507d016f63127e0540fc3abb6d7f61ff5d5339a",
+    ".claude/skills/next/SKILL.md": "7bc314bbbbede231e98bfa8a7e021810e0fa9f8183f3cbc36d00132bc1b07368",
+    ".claude/skills/plan-feature/SKILL.md": "695aaa7bf4d77ed3e4305757d07b45ba1089d53ea8f8b2bd38f47ccff3aa90ef",
+    ".claude/skills/wrap-up/SKILL.md": "fdad51abf69438fb7c2a137254cb7c41534f9ddc55c22cfc985393c806a93f60",
+    ".githooks/pre-commit": "bedfd6b81e90a806568bc2a4e426aa5f754ab2798afc100846d5f2945210ed01"
+  },
+  "templates": [
+    ".claude/kit.toml",
+    ".claude/review/project.md",
+    ".claude/rules/design-docs.md",
+    ".claude/rules/tests.md",
+    ".gitattributes",
+    ".gitignore",
+    ".worktreeinclude",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "docs/CHANGELOG.md",
+    "docs/CODE-STANDARDS.md",
+    "docs/ai/WORKFLOW.md",
+    "docs/ai/parallel-lanes.md",
+    "docs/ai/protected-paths.md",
+    "docs/backlog/README.md",
+    "docs/backlog/_TEMPLATE.md",
+    "docs/backlog/done/.gitkeep",
+    "docs/changelog.d/README.md",
+    "docs/design/DESIGN.md",
+    "docs/design/VISION.md",
+    "docs/design/decisions-log.md",
+    "docs/health/README.md",
+    "docs/plans/README.md",
+    "docs/plans/_TEMPLATE.md",
+    "docs/plans/finished/.gitkeep"
+  ],
+  "offered": {},
+  "hooks": [
+    {
+      "event": "PreToolUse",
+      "group": {
+        "matcher": "Bash|PowerShell|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/kit/hook\" protected",
+            "timeout": 30
+          }
+        ]
+      }
+    },
+    {
+      "event": "PreToolUse",
+      "group": {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/kit/hook\" ownership",
+            "timeout": 30
+          }
+        ]
+      }
+    },
+    {
+      "event": "PostToolUse",
+      "group": {
+        "matcher": "Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/kit/hook\" rules-check",
+            "timeout": 30
+          }
+        ]
+      }
+    },
+    {
+      "event": "SessionStart",
+      "group": {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh \"$CLAUDE_PROJECT_DIR/.claude/kit/hook\" lane-router",
+            "timeout": 30
+          }
+        ]
+      }
+    }
+  ]
+}

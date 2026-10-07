@@ -1,0 +1,28 @@
+{
+  "deny": [
+    "Read(.env)",
+    "Edit(.env)",
+    "Read(.env.*)",
+    "Edit(.env.*)",
+    "Read(!.env.example)",
+    "Edit(!.env.example)",
+    "Bash(git push --force *)",
+    "PowerShell(git push --force *)",
+    "Bash(git push -f *)",
+    "PowerShell(git push -f *)",
+    "Bash(git reset --hard *)",
+    "PowerShell(git reset --hard *)",
+    "Bash(git clean -f *)",
+    "PowerShell(git clean -f *)",
+    "Bash(git commit --no-verify *)",
+    "PowerShell(git commit --no-verify *)",
+    "Bash(git commit -n *)",
+    "PowerShell(git commit -n *)"
+  ],
+  "ask": [
+    "Edit(/.claude/settings.json)",
+    "Edit(/.claude/kit.toml)",
+    "Edit(/.claude/kit/**)",
+    "Edit(/.githooks/**)"
+  ]
+}

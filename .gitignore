@@ -1,2 +1,28 @@
 node_modules/
 .env
+
+# >>> claude-code-lanes-starter (managed: the installer rewrites the lines between these markers)
+# Secrets: never committed. Keys live outside the repo or in a local .env.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Claude Code: personal settings and lane worktrees
+.claude/settings.local.json
+.claude/worktrees/
+# The Python this machine uses for the kit (written by the installer; differs per machine)
+.claude/kit/python-path
+# The kit's bytecode, and the installer's files to review (*.kit-new) or half-written (*.kit-tmp)
+.claude/kit/**/__pycache__/
+*.kit-new
+*.kit-tmp
+
+# OS and editor clutter
+.DS_Store
+Thumbs.db
+*.swp
+
+# Stack-specific ignores are added below by stack packs or /onboard.
+# <<< claude-code-lanes-starter

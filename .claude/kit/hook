@@ -1,0 +1,46 @@
+#!/bin/sh
+# Runs `kit hook <name>` for every hook the kit wires: the installer's settings.json entries and the
+# reviewer agent's frontmatter, which can't hold this machine's interpreter path.
+# Usage: sh "$CLAUDE_PROJECT_DIR/.claude/kit/hook" <name>
+# Only the guards (protected, reviewer-bash) fail closed: any failure exits 2, the one code that
+# blocks in PreToolUse. The other hooks fail open by design (decisions 9, 40, 41), so a failure
+# there exits non-2 and never blocks an edit.
+kit=$(dirname "$0")
+case "$1" in
+    protected | reviewer-bash) failure=2 ;;
+    *) failure=1 ;;
+esac
+
+# The installer records the Python to use (a full path; on Windows `python` may be the Store alias).
+python=""
+if [ -f "$kit/python-path" ]; then
+    python=$(head -n 1 "$kit/python-path" | tr -d '\r')
+fi
+if [ -z "$python" ]; then
+    python=$(command -v python3 || command -v python)
+fi
+fail() {
+    if [ "$failure" -eq 2 ]; then
+        echo "Blocked: kit hook $1: $2" >&2
+    else
+        echo "kit hook $1: $2 (this hook fails open: nothing was blocked)" >&2
+    fi
+    exit "$failure"
+}
+if [ -z "$python" ] || ! [ -x "$python" ]; then
+    fail "$1" "no Python found; re-run the kit's installer, or record one in .claude/kit/python-path"
+fi
+# Checked here because Python itself exits 2 when it can't open the script: a block in PreToolUse.
+if ! [ -f "$kit/cli.py" ]; then
+    fail "$1" "$kit/cli.py is missing; re-run the kit's installer"
+fi
+
+"$python" "$kit/cli.py" hook "$@"
+status=$?
+# 0 and 2 are the hook's answers. For a guard anything else is a crash, which must not let the call
+# through; for the others the code passes through as a non-blocking error.
+if [ "$failure" -eq 2 ] && [ "$status" -ne 0 ] && [ "$status" -ne 2 ]; then
+    echo "Blocked: kit hook $1 failed (exit $status)" >&2
+    exit 2
+fi
+exit "$status"
