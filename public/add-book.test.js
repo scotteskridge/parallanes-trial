@@ -1,16 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { addBook, submitBook, loadBooks } from "./add-book.js";
-
-// Records the request and answers with a fixed status and JSON body; no real network.
-function fakeFetch(status, body) {
-  const calls = [];
-  const fetchFn = async (url, options) => {
-    calls.push({ url, options });
-    return { status, ok: status >= 200 && status < 300, json: async () => body };
-  };
-  return { fetchFn, calls };
-}
+import { fakeFetch } from "./fakes.js";
 
 test("posts the title and author as JSON to /api/books", async () => {
   const { fetchFn, calls } = fakeFetch(201, { id: 3, title: "Dune", author: "Frank Herbert" });
@@ -84,10 +75,54 @@ function fakePage(fieldValues) {
       },
     },
     button: { disabled: false },
-    errorText: { textContent: "", hidden: true },
+    errorText: { textContent: "", hidden: true, dataset: {} },
+    readCount: { textContent: "", hidden: true },
     list: doc.createElement("ul"),
   };
 }
+
+test("loadBooks shows the read count", async () => {
+  const ui = fakePage({ title: "", author: "" });
+  const existing = [
+    { id: 1, title: "Dune", author: "Frank Herbert", read: true },
+    { id: 2, title: "Emma", author: "Jane Austen", read: false },
+  ];
+
+  await loadBooks(ui, [], fakeFetch(200, existing).fetchFn);
+
+  assert.equal(ui.readCount.textContent, "1 of 2 read");
+  assert.equal(ui.readCount.hidden, false);
+});
+
+// toggleRead hides a message on success only if it wrote it, so every other writer marks its own.
+test("the add form's and the load's messages are marked as theirs, not the read toggle's", async () => {
+  const rejected = fakePage({ title: " ", author: "X" });
+  rejected.errorText.dataset.source = "toggle";
+  await submitBook(rejected, [], fakeFetch(400, { error: "title is required" }).fetchFn);
+
+  const failed = fakePage({ title: "Dune", author: "Frank Herbert" });
+  failed.errorText.dataset.source = "toggle";
+  await submitBook(failed, [], fakeFetch(500, {}).fetchFn, () => {});
+
+  const notLoaded = fakePage({ title: "", author: "" });
+  notLoaded.errorText.dataset.source = "toggle";
+  await loadBooks(notLoaded, [], fakeFetch(500, {}).fetchFn, () => {});
+
+  assert.deepEqual(
+    [rejected, failed, notLoaded].map((ui) => ui.errorText.dataset.source),
+    ["add-form", "add-form", "add-form"],
+  );
+});
+
+test("submitBook updates the read count to include the new book", async () => {
+  const ui = fakePage({ title: "Emma", author: "Jane Austen" });
+  const books = [{ id: 1, title: "Dune", author: "Frank Herbert", read: true }];
+  const created = { id: 2, title: "Emma", author: "Jane Austen", read: false };
+
+  await submitBook(ui, books, fakeFetch(201, created).fetchFn);
+
+  assert.equal(ui.readCount.textContent, "1 of 2 read");
+});
 
 test("submitBook adds the new book to the list, clears the form and hides the error", async () => {
   const ui = fakePage({ title: "Dune", author: "Frank Herbert" });

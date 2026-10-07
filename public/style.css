@@ -39,22 +39,39 @@ main {
   gap: 0.75rem;
 }
 
+/* Title and author stack on the left; the "Read" box sits on the right, spanning both rows. */
 .book-card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  column-gap: 1rem;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 0.75rem 1rem;
 }
 
-/* Block-level so the author sits under the title rather than beside it. */
-.book-title,
-.book-author {
-  display: block;
-}
-
 .book-author {
   color: #666;
   margin-top: 0.25rem;
+}
+
+.read-toggle {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #444;
+}
+
+.book-card.read .book-title {
+  color: #999;
+}
+
+.read-count {
+  margin: 0 0 0.5rem;
+  color: #666;
 }
 
 .empty {

@@ -13,6 +13,20 @@ Entry format:
 **Affects:** design sections, plans or code areas.
 ```
 
+## 2026-10-07: A failed read toggle reports in the add form's message area
+**Decision:** when saving a book's "Read" box fails, the message goes in the add form's message
+area (`#add-book-error`), with the form's rules: the API's message on a 400/404, a general message
+otherwise. A successful toggle hides only a message a toggle wrote, never the form's.
+**Why:** one message area for the page, as the failed-load message already does; a message on
+the card itself was the alternative, closer to the box but more code. Confirmed by the owner.
+**Affects:** `public/toggle-read.js`, `public/add-book.js`.
+
+## 2026-10-07: The read count is hidden when there are no books
+**Decision:** "N of M read" above the list is hidden when the list is empty.
+**Why:** the empty state already says "No books yet"; "0 of 0 read" would add nothing. Confirmed by
+the owner.
+**Affects:** `public/render.js` (`renderReadCount`).
+
 ## 2026-10-07: How PATCH /api/books/:id resolves ids and orders its errors
 **Decision:** the id is matched with `Number()`, so `/api/books/1.0` (or `0x1`, `1e0`) reaches book
 1 and a non-numeric id is a 404. An unknown id gets the 404 before the body is checked, so a bad id

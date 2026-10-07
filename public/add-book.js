@@ -1,4 +1,4 @@
-import { renderBooks } from "./render.js";
+import { renderBooks, renderReadCount } from "./render.js";
 
 // Posts a new book. `fetchFn` is a parameter so tests can pass a stand-in for `fetch`.
 // Resolves to { book } on success or { error } when the API rejects the input (400).
@@ -27,7 +27,7 @@ export async function addBook({ title, author }, fetchFn = fetch) {
 // button stays disabled: the form can't show a new book among books that never loaded. The message
 // reuses the add form's error area deliberately, since the form is unusable after a failed load.
 export async function loadBooks(ui, books, fetchFn = fetch, logError = console.error) {
-  const { button, errorText, list, doc } = ui;
+  const { button, errorText, readCount, list, doc } = ui;
   try {
     const res = await fetchFn("/api/books");
     if (!res.ok) {
@@ -35,11 +35,14 @@ export async function loadBooks(ui, books, fetchFn = fetch, logError = console.e
     }
     books.push(...(await res.json()));
     renderBooks(list, books, doc);
+    renderReadCount(readCount, books);
     button.disabled = false;
   } catch (err) {
     logError(err);
     errorText.textContent = "Could not load the reading list. Please reload the page.";
     errorText.hidden = false;
+    // So a read toggle's success, which hides only its own messages, leaves this one showing.
+    errorText.dataset.source = "add-form";
   }
 }
 
@@ -47,7 +50,7 @@ export async function loadBooks(ui, books, fetchFn = fetch, logError = console.e
 // list currently shown and is added to on success. `fetchFn` and `logError` are parameters so
 // tests need no network or console.
 export async function submitBook(ui, books, fetchFn = fetch, logError = console.error) {
-  const { form, button, errorText, list, doc } = ui;
+  const { form, button, errorText, readCount, list, doc } = ui;
   // Disabled while posting so a double click can't add the same book twice.
   button.disabled = true;
   try {
@@ -58,10 +61,12 @@ export async function submitBook(ui, books, fetchFn = fetch, logError = console.
     if (error) {
       errorText.textContent = error;
       errorText.hidden = false;
+      errorText.dataset.source = "add-form";
       return;
     }
     books.push(book);
     renderBooks(list, books, doc);
+    renderReadCount(readCount, books);
     form.reset();
     errorText.hidden = true;
   } catch (err) {
@@ -70,6 +75,7 @@ export async function submitBook(ui, books, fetchFn = fetch, logError = console.
     logError(err);
     errorText.textContent = "Something went wrong. Please try again.";
     errorText.hidden = false;
+    errorText.dataset.source = "add-form";
   } finally {
     button.disabled = false;
   }
