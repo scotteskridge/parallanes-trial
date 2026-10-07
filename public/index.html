@@ -9,6 +9,12 @@
   <body>
     <main>
       <h1>Reading list</h1>
+      <form id="add-book">
+        <label>Title <input name="title" required /></label>
+        <label>Author <input name="author" required /></label>
+        <button type="submit" disabled>Add book</button>
+        <p id="add-book-error" class="form-error" role="alert" hidden></p>
+      </form>
       <ul id="books"></ul>
     </main>
     <script type="module" src="app.js"></script>
